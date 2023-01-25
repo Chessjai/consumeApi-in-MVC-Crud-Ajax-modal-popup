@@ -1,0 +1,353 @@
+﻿@model S3Q3.Models.studentmodel
+@{
+    ViewBag.Title = "Index";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>DisplayStudents</title>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" />
+    <script type="text/javascript" src="//cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" />
+    <script type="text/javascript" src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#save").click(function () {
+                var Dataform = $("#studentForm").serialize();
+                debugger;
+                $.ajax({
+                    type: "POST",
+                    url: "/MVC/Create",
+                    data: Dataform,
+                    success: function () {
+                        alert("Student is Added");
+                        window.location.href = "/MVC/Index";
+                    }
+                })
+            })
+        })
+        
+      
+        
+        function GetDetails(id) {
+            debugger;
+            $('#Emp').val(id);
+            $.ajax({
+                url: "/MVC/EditEmployee/" + id,
+                type: "GET",
+                contentType: "application/json;charset=UTF-8",
+                dataType: "json",
+                success: function (response) {
+                    debugger;
+                    $('#Emp').val(response.id);
+                    $('#txtUpdateName').val(response.name);
+                    $('#txtUpdateDOB').val(response.dob);
+                    $('#modal-Update').modal('show');
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+            return false;
+        }
+
+        ///*   delete*/
+        var Confirm = function (id) {
+            $("#stdid").val(id);
+            debugger;
+            $("#deleteModal").modal('show');
+            $('#btn-delete').click(function () {
+                var ID = $("#stdid").val();
+                $.ajax({
+                    type: "POST",
+                    url: "/MVC/Delete",
+                    data: { id: ID },
+                    success: function () {
+                        $("#deleteModal").modal('hide');
+                        $("#stdid").val(null);
+                        alert("Student is deleted");
+                        window.location.href = '/MVC/Index';
+                    },
+                    failure: function () {
+                        alert("Something Went wrong");
+                    }
+                });
+            })
+        }
+
+
+        /*detals*/
+        function Details(id) {
+            debugger;
+            $.ajax({
+                url: "/MVC/Details/" + id,
+                type: "GET",
+                contentType: "application/json;charset=UTF-8",
+                dataType: "json",
+                success: function (response) {
+                    $('#hfId').html(response.id);
+                    $('#txtName').html(response.name);
+                    $('#txtAge').html(response.age);
+                    $('#txtDOB').html(response.DOB1);
+                    $('#txtcreated_on').html(response.created_on2);
+                    $('#txtupdate_on').html(response.update_on2);
+                    $('#txtcreate_by').html(response.createby);
+                    $('#txtupdated_by').html(response.updatedby);
+                    $('#DetailsModal').modal('show');
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+            return false;
+        }
+
+    
+    </script>
+
+
+</head>
+<body>
+    <a href="" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Add Student
+    </a>
+
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Enter Student Information </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="studentForm">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.name, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.name, new { htmlAttributes = new { @class = "form-control" } })
+                            </div>
+                        </div> <div class="form-group">
+                            @Html.LabelFor(model => model.dob, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.dob, new { htmlAttributes = new { @class = "form-control", @type = "date" } })
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <div class="btn-group">
+                        <a href="#" id="btn-cancel" class="btn btn-danger" data-bs-dismiss="modal">Close</a>
+                        <a href="#" id="save" class="btn btn-primary">Save</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2>Student List </h2>
+
+    @*display list*@
+    <table class="table table-bordered">
+        <tr class="btn-primary">
+            <th>
+                Id
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Age
+            </th>
+            <th>
+                DOB
+            </th>
+            <th>
+                Created On
+            </th>
+            <th>
+                Update On
+            </th>
+            <th>
+                Create By
+            </th>
+            <th>
+                Updated By
+            </th>
+            <th>
+                Actions
+            </th>
+        </tr>
+
+        @foreach (var item in ViewBag.std)
+        {
+            <tr>
+
+                <td>
+                    @item.id
+                </td>
+                <td>
+                    @item.name
+                </td>
+                <td>
+                    @item.age
+                </td>
+                <td>
+                    @item.dob
+                </td>
+                <td>
+                    @item.createdon
+                </td>
+                <td>
+                    @item.updateon
+                </td>
+                <td>
+                    @item.createby
+                </td>
+                <td>
+                    @item.updatedby
+                </td>
+
+                <td>
+                    <a herf="#" class="btn btn-primary"  data-bs-toggle="modal" data-bs-target="#modal-Update"onclick="GetDetails(@item.id)"> Edit</a>
+                    <a herf="#" class="btn btn-primary" onclick="Details(@item.id)" data-bs-toggle="modal" data-bs-target="#DetailsModal"> Details</a>|
+
+                    @*<a herf="#" id="showModal" > </a>*@
+                    <a href="#" class="btn btn-danger" onclick="Confirm(@item.id)" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+        }
+    </table>
+
+    <input type="hidden" id="stdid" />
+
+    @*delete*@
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Confirm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="studentDeleteForm">
+                        <h3>Are you sure you want to delete this?</h3>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btn-cancel" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="btn-delete" class="btn btn-primary delete">Delete </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*Details*@
+    <div class="modal fade" id="DetailsModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Student Details </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="col-md-8">
+                        @using (Html.BeginForm("Details", "MVC", FormMethod.Get))
+                        {
+                            <div class="modal-body">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">ID :</label>
+                                        <span id="hfId"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">Name :</label>
+                                        <span id="txtName"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">Age :</label>
+                                        <span id="txtAge"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">DOB :</label>
+                                        <span id="txtDOB"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">Created Date :</label>
+                                        <span id="txtcreated_on"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">Updated Date :</label>
+                                        <span id="txtupdate_on"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">Create_by :</label>
+                                        <span id="txtcreate_by"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">Update_By :</label>
+                                        <span id="txtupdated_by"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*Edit*@
+  
+    <div class="modal fade" id="modal-Update">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Update Student Information </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="height:250px">
+                    <div class="box box-primary">
+                        @using (Html.BeginForm("Edit", "MVC", FormMethod.Post))
+                        {
+                            <div class="modal-body">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <input type="hidden"   class="form-control" id="Emp" name="Id" value="">
+                                        <label for="exampleInputEmail1">Name :</label>
+                                        <input type="text" class="form-control" id="txtUpdateName" name="Name" placeholder="Name">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>DOB</label>
+                                        <input type="date" class="form-control" id="txtDOB" name="DOB" placeholder="DOB">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Update</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </body>
+</html>
+ 
